@@ -22,7 +22,7 @@ mvn clean install -Pbuild-jar
 Then: in the flink folder:
 
 ####
-./bin/flink run -c master2018.flink.VehicleTelematics /home/jackie/flink-vehicle-telematics/flinkProgram/target/flink-1.jar file:///home/jackie/flink-1.3.2/data/testdata file:///home/jackie/flink-1.3.2/data/outtest
+./bin/flink run -c master2018.flink.VehicleTelematics /home/jackie/flink-vehicle-telematics/flinkProgram/target/flink-1.jar file:///home/jackie/flink-1.3.2/data/testdata file:///home/jackie/flink-1.3.2/data/speedfines.csv
 
 
 					  
