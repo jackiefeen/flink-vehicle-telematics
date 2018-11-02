@@ -17,17 +17,17 @@ public class VehicleTelematics {
         final String inFilePath = args[0];
         final String outFilePath = args[1];
 
-        final DataStreamSource<String> source = env.readTextFile(inFilePath);
-        source
+        final DataStreamSource<String> source = env.readTextFile(inFilePath).setParallelism(10);
+        source.setParallelism(10)
                 .map((MapFunction<String, VehicleReport>) in -> {
                     final Long[] params = Arrays.stream(in.split(","))
                             .map(Long::parseLong)
                             .toArray(Long[]::new);
                     return new VehicleReport(params);
-                })
-                .filter((FilterFunction<VehicleReport>) report -> report.getSpeed() > MAX_SPEED)
-                .map((MapFunction<VehicleReport, String>) VehicleReport::speedFineOutputFormat)
-                .writeAsText(outFilePath, FileSystem.WriteMode.OVERWRITE);
+                }).setParallelism(10)
+                .filter((FilterFunction<VehicleReport>) report -> report.getSpeed() > MAX_SPEED).setParallelism(10)
+                .map((MapFunction<VehicleReport, String>) VehicleReport::speedFineOutputFormat).setParallelism(10)
+                .writeAsText(outFilePath, FileSystem.WriteMode.OVERWRITE).setParallelism(1);
 
         try {
             env.execute("SpeedRadar");
@@ -36,3 +36,5 @@ public class VehicleTelematics {
         }
     }
 }
+
+

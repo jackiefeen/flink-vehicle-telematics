@@ -1,8 +1,5 @@
 package master2018.flink;
 
-import lombok.Getter;
-
-@Getter
 class VehicleReport {
     private Long timestamp;
     private Long vehicleId;
@@ -12,6 +9,7 @@ class VehicleReport {
     private Long direction;
     private Long segment;
     private Long position;
+
 
     VehicleReport(final Long... params) {
         if (params.length != 8) {
@@ -28,7 +26,46 @@ class VehicleReport {
         this.position = params[7];
     }
 
+
+    public Long getTimestamp() {
+        return timestamp;
+    }
+
+    public Long getVehicleId() {
+        return vehicleId;
+    }
+
+    public Long getSpeed() {
+        return speed;
+    }
+
+    public Long getHighwayId() {
+        return highwayId;
+    }
+
+    public Long getLane() {
+        return lane;
+    }
+
+    public Long getDirection() {
+        return direction;
+    }
+
+    public Long getSegment() {
+        return segment;
+    }
+
+    public Long getPosition() {
+        return position;
+    }
+
     String speedFineOutputFormat() {
         return String.format("%s,%s,%s,%s,%s,%s", timestamp, vehicleId, highwayId, segment, direction, speed);
     }
+    String accidentOutputFormat() {
+        return String.format("%s,%s,%s,%s,%s,%s", timestamp, timestamp, vehicleId, highwayId, segment, direction, position);
+    }
+
 }
+
+
