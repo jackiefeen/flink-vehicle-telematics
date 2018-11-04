@@ -4,14 +4,14 @@ import lombok.Getter;
 
 @Getter
 class VehicleReport {
-    private Long timestamp;
-    private Long vehicleId;
-    private Long speed;
-    private Long highwayId;
-    private Long lane;
-    private Long direction;
-    private Long segment;
-    private Long position;
+    private long timestamp;
+    private long vehicleId;
+    private long speed;
+    private long highwayId;
+    private long lane;
+    private long direction;
+    private long segment;
+    private long position;
 
     VehicleReport(final Long... params) {
         if (params.length != 8) {
@@ -26,9 +26,5 @@ class VehicleReport {
         this.direction = params[5];
         this.segment = params[6];
         this.position = params[7];
-    }
-
-    String speedFineOutputFormat() {
-        return String.format("%s,%s,%s,%s,%s,%s", timestamp, vehicleId, highwayId, segment, direction, speed);
     }
 }
