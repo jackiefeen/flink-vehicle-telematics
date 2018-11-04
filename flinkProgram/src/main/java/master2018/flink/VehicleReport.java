@@ -1,17 +1,17 @@
 package master2018.flink;
 
 class VehicleReport {
-    private Long timestamp;
-    private Long vehicleId;
-    private Long speed;
-    private Long highwayId;
-    private Long lane;
-    private Long direction;
-    private Long segment;
-    private Long position;
+    private Integer timestamp;
+    private Integer vehicleId;
+    private Integer speed;
+    private Integer highwayId;
+    private Integer lane;
+    private Integer direction;
+    private Integer segment;
+    private Integer position;
 
 
-    VehicleReport(final Long... params) {
+    VehicleReport(final Integer... params) {
         if (params.length != 8) {
             throw new IllegalArgumentException();
         }
@@ -27,43 +27,40 @@ class VehicleReport {
     }
 
 
-    public Long getTimestamp() {
+    public Integer getTimestamp() {
         return timestamp;
     }
 
-    public Long getVehicleId() {
+    public Integer getVehicleId() {
         return vehicleId;
     }
 
-    public Long getSpeed() {
+    public Integer getSpeed() {
         return speed;
     }
 
-    public Long getHighwayId() {
+    public Integer getHighwayId() {
         return highwayId;
     }
 
-    public Long getLane() {
+    public Integer getLane() {
         return lane;
     }
 
-    public Long getDirection() {
+    public Integer getDirection() {
         return direction;
     }
 
-    public Long getSegment() {
+    public Integer getSegment() {
         return segment;
     }
 
-    public Long getPosition() {
+    public Integer getPosition() {
         return position;
     }
 
     String speedFineOutputFormat() {
         return String.format("%s,%s,%s,%s,%s,%s", timestamp, vehicleId, highwayId, segment, direction, speed);
-    }
-    String accidentOutputFormat() {
-        return String.format("%s,%s,%s,%s,%s,%s", timestamp, timestamp, vehicleId, highwayId, segment, direction, position);
     }
 
 }
