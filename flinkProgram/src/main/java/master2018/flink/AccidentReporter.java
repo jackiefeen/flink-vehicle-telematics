@@ -74,7 +74,7 @@ public class AccidentReporter {
                         counter = counter + 1;
                     }
 
-                    if (firstevent != null && fourthevent != null) {
+                    if (firstevent != null && fourthevent != null && firstevent.getTimestamp()+90 == fourthevent.getTimestamp()) {
                         out.collect(new Tuple7<>(firstevent.getTimestamp(), fourthevent.getTimestamp(),
                                 firstevent.getVehicleId(), firstevent.getHighwayId(), firstevent.getSegment(),
                                 firstevent.getDirection(), firstevent.getPosition()));
@@ -83,9 +83,7 @@ public class AccidentReporter {
                     }
                 }
             }
-            else{
-                return;
-            }
+
         }
     }
 }
