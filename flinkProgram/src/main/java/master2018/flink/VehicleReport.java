@@ -1,66 +1,49 @@
 package master2018.flink;
 
-class VehicleReport {
-    private Integer timestamp;
-    private Integer vehicleId;
-    private Integer speed;
-    private Integer highwayId;
-    private Integer lane;
-    private Integer direction;
-    private Integer segment;
-    private Integer position;
+import org.apache.flink.api.java.tuple.Tuple7;
 
+public class VehicleReport extends Tuple7<Long, Long, Integer, Integer, Integer, Integer, Integer > {
 
-    VehicleReport(final Integer... params) {
-        if (params.length != 8) {
-            throw new IllegalArgumentException();
-        }
+    public VehicleReport(){
 
-        this.timestamp = params[0];
-        this.vehicleId = params[1];
-        this.speed = params[2];
-        this.highwayId = params[3];
-        this.lane = params[4];
-        this.direction = params[5];
-        this.segment = params[6];
-        this.position = params[7];
     }
 
+    public VehicleReport(Long timestamp, Long vehicleId, Integer speed,
+                  Integer highwayId, Integer direction, Integer segment, Integer position) {
 
-    public Integer getTimestamp() {
-        return timestamp;
+        this.f0 = timestamp;
+        this.f1 = vehicleId;
+        this.f2 = speed;
+        this.f3 = highwayId;
+        this.f4 = direction;
+        this.f5 = segment;
+        this.f6 = position;
     }
 
-    public Integer getVehicleId() {
-        return vehicleId;
+    public Long getTimestamp(){
+        return this.f0;
     }
-
-    public Integer getSpeed() {
-        return speed;
+    public Long getVehicleId(){
+        return this.f1;
     }
-
-    public Integer getHighwayId() {
-        return highwayId;
+    public Integer getSpeed(){
+        return this.f2;
     }
-
-    public Integer getLane() {
-        return lane;
+    public Integer getHighwayId(){
+        return this.f3;
     }
-
-    public Integer getDirection() {
-        return direction;
+    public Integer getDirection(){
+        return this.f4;
     }
-
-    public Integer getSegment() {
-        return segment;
+    public Integer getSegment(){
+        return this.f5;
     }
-
-    public Integer getPosition() {
-        return position;
+    public Integer getPosition(){
+        return this.f6;
     }
 
     String speedFineOutputFormat() {
-        return String.format("%s,%s,%s,%s,%s,%s", timestamp, vehicleId, highwayId, segment, direction, speed);
+        return String.format("%s,%s,%s,%s,%s,%s", f0, f1, f3, f5, f4, f2);
     }
 
 }

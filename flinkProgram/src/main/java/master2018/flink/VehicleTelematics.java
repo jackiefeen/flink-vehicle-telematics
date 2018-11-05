@@ -18,17 +18,14 @@ public class VehicleTelematics {
 
         final DataStreamSource<String> source = env.readTextFile(inFilePath);
 
-        //TODO: maybe the program runs more efficiently if we only ingest the fields that we need for the tasks in the, i.e. remove lane!
-        //TODO: the bottleneck seems to be the very first map function!
         source
                 .map(line -> { String[] cells = line.split(",");
-                    return new VehicleReport(Integer.parseInt(cells[0]), Integer.parseInt(cells[1]), Integer.parseInt(cells[2]),
-                            Integer.parseInt(cells[3]), Integer.parseInt(cells[4]), Integer.parseInt(cells[5]),
+                    return new VehicleReport(Long.parseLong(cells[0]), Long.parseLong(cells[1]),
+                            Integer.parseInt(cells[2]), Integer.parseInt(cells[3]), Integer.parseInt(cells[5]),
                             Integer.parseInt(cells[6]), Integer.parseInt(cells[7]));
                 }).setParallelism(10)
 
                 .filter((FilterFunction<VehicleReport>) report -> report.getSpeed() > MAX_SPEED).setParallelism(10)
-                //Todo: this can be a lot more efficient without mapping it back to String. Let's use collect()!
                 .map((MapFunction<VehicleReport, String>) VehicleReport::speedFineOutputFormat).setParallelism(10)
                 .writeAsText(outFilePath, FileSystem.WriteMode.OVERWRITE).setParallelism(1);
 
