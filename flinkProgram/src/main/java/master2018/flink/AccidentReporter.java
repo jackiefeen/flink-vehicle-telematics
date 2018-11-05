@@ -1,6 +1,6 @@
 package master2018.flink;
 
-import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.tuple.Tuple7;
@@ -9,6 +9,7 @@ import org.apache.flink.shaded.com.google.common.collect.Iterables;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.timestamps.AscendingTimestampExtractor;
 import org.apache.flink.streaming.api.functions.windowing.WindowFunction;
 import org.apache.flink.streaming.api.windowing.windows.GlobalWindow;
 import org.apache.flink.util.Collector;
@@ -28,16 +29,14 @@ public class AccidentReporter {
 
         final DataStreamSource<String> source = env.readTextFile(inFilePath);
 
-        //TODO: maybe the program runs more efficiently if we only ingest the fields that we need for the tasks in the, i.e. remove lane!
-        //TODO: the bottleneck seems to be the very first map function!
-        source
+        source.setParallelism(1)
                 .map(line -> { String[] cells = line.split(",");
-                    return new VehicleReport(Integer.parseInt(cells[0]), Integer.parseInt(cells[1]), Integer.parseInt(cells[2]),
-                            Integer.parseInt(cells[3]), Integer.parseInt(cells[4]), Integer.parseInt(cells[5]),
+                    return new VehicleReport(Long.parseLong(cells[0]), Long.parseLong(cells[1]), Integer.parseInt(cells[2]),
+                            Integer.parseInt(cells[3]), Integer.parseInt(cells[5]),
                             Integer.parseInt(cells[6]), Integer.parseInt(cells[7]));
-                }).setParallelism(10)
-
-                .keyBy((KeySelector<VehicleReport, Tuple3<Integer, Integer, Integer>>) value ->
+                }).setParallelism(1)
+                .filter((FilterFunction<VehicleReport>) report -> report.getSpeed() == 0).setParallelism(1)
+                .keyBy((KeySelector<VehicleReport, Tuple3<Long, Integer, Integer>>) value ->
                         Tuple3.of(value.getVehicleId(), value.getDirection(), value.getPosition()))
                 .countWindow(MAX_EVENTS, 1)
                 .apply(new CustomWindowFunction()).setParallelism(10)
@@ -51,10 +50,10 @@ public class AccidentReporter {
     }
 
 
-    private static class CustomWindowFunction implements WindowFunction<VehicleReport, Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer>, Tuple3<Integer, Integer, Integer>, GlobalWindow> {
+    private static class CustomWindowFunction implements WindowFunction<VehicleReport, Tuple7<Long, Long, Long, Integer, Integer, Integer, Integer>, Tuple3<Long, Integer, Integer>, GlobalWindow> {
 
         @Override
-        public void apply(Tuple3<Integer, Integer, Integer> key, GlobalWindow window, Iterable<VehicleReport> input, Collector<Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer>> out) throws Exception {
+        public void apply(Tuple3<Long, Integer, Integer> key, GlobalWindow window, Iterable<VehicleReport> input, Collector<Tuple7<Long, Long, Long, Integer, Integer, Integer, Integer>> out){
 
             if (Iterables.size(input) >= 4) {
 
@@ -83,6 +82,9 @@ public class AccidentReporter {
                         fourthevent = null;
                     }
                 }
+            }
+            else{
+                return;
             }
         }
     }
