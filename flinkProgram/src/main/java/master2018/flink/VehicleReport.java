@@ -1,16 +1,13 @@
 package master2018.flink;
 
+import lombok.NoArgsConstructor;
 import org.apache.flink.api.java.tuple.Tuple7;
 
-public class VehicleReport extends Tuple7<Long, Long, Integer, Integer, Integer, Integer, Integer > {
+@NoArgsConstructor
+public class VehicleReport extends Tuple7<Long, Long, Integer, Integer, Integer, Integer, Integer> {
 
-    public VehicleReport(){
-
-    }
-
-    public VehicleReport(Long timestamp, Long vehicleId, Integer speed,
-                  Integer highwayId, Integer direction, Integer segment, Integer position) {
-
+    public VehicleReport(final Long timestamp, final Long vehicleId, final Integer speed,
+                         final Integer highwayId, final Integer direction, final Integer segment, final Integer position) {
         this.f0 = timestamp;
         this.f1 = vehicleId;
         this.f2 = speed;
@@ -20,32 +17,31 @@ public class VehicleReport extends Tuple7<Long, Long, Integer, Integer, Integer,
         this.f6 = position;
     }
 
-    public Long getTimestamp(){
+    public Long getTimestamp() {
         return this.f0;
     }
-    public Long getVehicleId(){
+
+    public Long getVehicleId() {
         return this.f1;
     }
-    public Integer getSpeed(){
+
+    public Integer getSpeed() {
         return this.f2;
     }
-    public Integer getHighwayId(){
+
+    public Integer getHighwayId() {
         return this.f3;
     }
-    public Integer getDirection(){
+
+    public Integer getDirection() {
         return this.f4;
     }
-    public Integer getSegment(){
+
+    public Integer getSegment() {
         return this.f5;
     }
-    public Integer getPosition(){
+
+    public Integer getPosition() {
         return this.f6;
     }
-
-    String speedFineOutputFormat() {
-        return String.format("%s,%s,%s,%s,%s,%s", f0, f1, f3, f5, f4, f2);
-    }
-
 }
-
-
