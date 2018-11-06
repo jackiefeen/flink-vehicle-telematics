@@ -1,3 +1,4 @@
+/*
 package master2018.flink;
 
 import org.apache.flink.api.common.functions.FilterFunction;
@@ -50,7 +51,7 @@ public class AccidentReporter {
     }
 
 
-    private static class CustomWindowFunction implements WindowFunction<VehicleReport, Tuple7<Long, Long, Long, Integer, Integer, Integer, Integer>, Tuple3<Long, Integer, Integer>, GlobalWindow> {
+    public static class CustomWindowFunction implements WindowFunction<VehicleReport, Tuple7<Long, Long, Long, Integer, Integer, Integer, Integer>, Tuple3<Long, Integer, Integer>, GlobalWindow> {
 
         @Override
         public void apply(Tuple3<Long, Integer, Integer> key, GlobalWindow window, Iterable<VehicleReport> input, Collector<Tuple7<Long, Long, Long, Integer, Integer, Integer, Integer>> out){
@@ -89,4 +90,4 @@ public class AccidentReporter {
 }
 
 
-
+*/
