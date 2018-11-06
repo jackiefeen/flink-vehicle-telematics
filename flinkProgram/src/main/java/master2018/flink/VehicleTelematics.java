@@ -1,8 +1,6 @@
 package master2018.flink;
 
 import org.apache.flink.api.common.functions.FilterFunction;
-import org.apache.flink.api.common.functions.MapFunction;
-import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.tuple.Tuple7;
@@ -38,43 +36,42 @@ public class VehicleTelematics {
 
         final DataStreamSource<String> source = env.readTextFile(inFilePath);
 
-        SingleOutputStreamOperator<VehicleReport> mappeddata = source.setParallelism(1)
-                .map(line -> {
-                    String[] cells = line.split(",");
-                    return new VehicleReport(Long.parseLong(cells[0]), Long.parseLong(cells[1]),
-                            Integer.parseInt(cells[2]), Integer.parseInt(cells[3]), Integer.parseInt(cells[5]),
-                            Integer.parseInt(cells[6]), Integer.parseInt(cells[7]));
-                }).setParallelism(1);
+        SingleOutputStreamOperator<VehicleReport> speedradarmappeddata =
+                source.map(VehicleTelematics::CellSplitter).startNewChain().setParallelism(10);
 
-            //SpeedRadar
-            mappeddata
+        //SpeedRadar
+        speedradarmappeddata
                 .filter((FilterFunction<VehicleReport>) report -> report.getSpeed() > MAX_SPEED).setParallelism(10)
                 .map(VehicleReport::speedFineOutputFormat).setParallelism(10)
                 .writeAsText(outDirectoryPath + "/speedfines.csv", FileSystem.WriteMode.OVERWRITE).setParallelism(1);
 
-            //AccidentReporter
-            mappeddata
-                    .filter((FilterFunction<VehicleReport>) report -> report.getSpeed() == 0).setParallelism(1)
-                    .keyBy(VehicleTelematics::keyByVehicleIdDirectionAndPosition)
-                    .countWindow(MAX_EVENTS, 1)
-                    .apply(new CustomWindowFunction()).setParallelism(10)
-                    .writeAsCsv(outDirectoryPath + "/accidents.csv", FileSystem.WriteMode.OVERWRITE).setParallelism(1);
 
-            //AverageSpeedFine
-            mappeddata
-                    .filter(report -> 52 <= report.getSegment() && report.getSegment() <= 56).setParallelism(10)
-                    .assignTimestampsAndWatermarks(new AscendingTimestampExtractor<VehicleReport>() {
-                        @Override
-                        public long extractAscendingTimestamp(VehicleReport vehicleReport) {
-                            return vehicleReport.getTimestamp() * 1000;
-                        }
-                    })
-                    .keyBy(VehicleTelematics::keyByVehicleIdHighwayIdAndDirection)
-                    .window(EventTimeSessionWindows.withGap(Time.seconds(31)))
-                    .apply(VehicleTelematics::calcAverageSpeed)
-                    .filter(report -> report.getAverageSpeed() > MAX_AVG_SPEED)
-                    .map(OutputFormatter::toAvgSpeedFineFormat)
-                    .writeAsText(outDirectoryPath + "/avgspeedfines.csv", FileSystem.WriteMode.OVERWRITE).setParallelism(1);
+        SingleOutputStreamOperator<VehicleReport> mappeddata = source.setParallelism(1)
+                .map(VehicleTelematics::CellSplitter).startNewChain().setParallelism(1);
+
+        //AccidentReporter
+        mappeddata
+                .filter((FilterFunction<VehicleReport>) report -> report.getSpeed() == 0).startNewChain().setParallelism(1)
+                .keyBy(VehicleTelematics::keyByVehicleIdDirectionAndPosition)
+                .countWindow(MAX_EVENTS, 1)
+                .apply(new CustomWindowFunction()).setParallelism(10)
+                .writeAsCsv(outDirectoryPath + "/accidents.csv", FileSystem.WriteMode.OVERWRITE).setParallelism(1);
+
+        //AverageSpeedFine
+        mappeddata
+                .filter(report -> 52 <= report.getSegment() && report.getSegment() <= 56).startNewChain().setParallelism(1)
+                .assignTimestampsAndWatermarks(new AscendingTimestampExtractor<VehicleReport>() {
+                    @Override
+                    public long extractAscendingTimestamp(VehicleReport vehicleReport) {
+                        return vehicleReport.getTimestamp() * 1000;
+                    }
+                })
+                .keyBy(VehicleTelematics::keyByVehicleIdHighwayIdAndDirection)
+                .window(EventTimeSessionWindows.withGap(Time.seconds(31)))
+                .apply(VehicleTelematics::calcAverageSpeed)
+                .filter(report -> report.getAverageSpeed() > MAX_AVG_SPEED)
+                .map(OutputFormatter::toAvgSpeedFineFormat)
+                .writeAsText(outDirectoryPath + "/avgspeedfines.csv", FileSystem.WriteMode.OVERWRITE).setParallelism(1);
 
         try {
             env.execute("VehicleTelematics");
@@ -83,11 +80,17 @@ public class VehicleTelematics {
         }
     }
 
+    public static VehicleReport CellSplitter(String line) {
+        String[] cells = line.split(",");
+        return new VehicleReport(Long.parseLong(cells[0]), Long.parseLong(cells[1]),
+                Integer.parseInt(cells[2]), Integer.parseInt(cells[3]), Integer.parseInt(cells[5]),
+                Integer.parseInt(cells[6]), Integer.parseInt(cells[7]));
+    }
 
     public static class CustomWindowFunction implements WindowFunction<VehicleReport, Tuple7<Long, Long, Long, Integer, Integer, Integer, Integer>, Tuple3<Long, Integer, Integer>, GlobalWindow> {
 
         @Override
-        public void apply(Tuple3<Long, Integer, Integer> key, GlobalWindow window, Iterable<VehicleReport> input, Collector<Tuple7<Long, Long, Long, Integer, Integer, Integer, Integer>> out){
+        public void apply(Tuple3<Long, Integer, Integer> key, GlobalWindow window, Iterable<VehicleReport> input, Collector<Tuple7<Long, Long, Long, Integer, Integer, Integer, Integer>> out) {
 
             if (Iterables.size(input) >= 4) {
 
@@ -108,7 +111,7 @@ public class VehicleTelematics {
                         counter = counter + 1;
                     }
 
-                    if (firstevent != null && fourthevent != null && firstevent.getTimestamp()+90 == fourthevent.getTimestamp()) {
+                    if (firstevent != null && fourthevent != null && firstevent.getTimestamp() + 90 == fourthevent.getTimestamp()) {
                         out.collect(new Tuple7<>(firstevent.getTimestamp(), fourthevent.getTimestamp(),
                                 firstevent.getVehicleId(), firstevent.getHighwayId(), firstevent.getSegment(),
                                 firstevent.getDirection(), firstevent.getPosition()));
