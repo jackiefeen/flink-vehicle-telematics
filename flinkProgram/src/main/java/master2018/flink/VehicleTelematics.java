@@ -20,6 +20,7 @@ public class VehicleTelematics {
     private static final long NUMBER_OF_SEGMENTS = 5;
     private static final long MAX_SPEED = 90;
     private static final long MAX_AVG_SPEED = 60;
+    private static final double METERS_PER_SEC_TO_MILES_PER_HOUR = 2.23693629;
 
     @SuppressWarnings("serial")
     public static void main(String args[]) {
@@ -69,21 +70,23 @@ public class VehicleTelematics {
         }
 
         Set<Integer> coveredSegments = new HashSet<>();
-        long startTime = Integer.MAX_VALUE;
-        long endTime = Integer.MIN_VALUE;
-        double aggregatedSpeed = 0;
+        long startTime = Long.MAX_VALUE;
+        long endTime = Long.MIN_VALUE;
+        int minPosition = Integer.MAX_VALUE;
+        int maxPosition = Integer.MIN_VALUE;
         for (final VehicleReport report : input) {
             coveredSegments.add(report.getSegment());
             startTime = Long.min(startTime, report.getTimestamp());
             endTime = Long.max(endTime, report.getTimestamp());
-            aggregatedSpeed += report.getSpeed();
+            minPosition = Integer.min(minPosition, report.getPosition());
+            maxPosition = Integer.max(maxPosition, report.getPosition());
         }
 
         if (coveredSegments.size() < NUMBER_OF_SEGMENTS) {
             return;
         }
 
-        final double averageSpeed = aggregatedSpeed / numberOfReports;
+        final double averageSpeed = (maxPosition - minPosition) / (endTime - startTime) * METERS_PER_SEC_TO_MILES_PER_HOUR;
         out.collect(new AverageSpeedReport(startTime, endTime, key.getField(0), key.getField(1), key.getField(2), averageSpeed));
     }
 
