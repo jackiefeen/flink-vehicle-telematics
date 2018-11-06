@@ -86,7 +86,9 @@ public class VehicleTelematics {
             return;
         }
 
-        final double averageSpeed = (maxPosition - minPosition) / (endTime - startTime) * METERS_PER_SEC_TO_MILES_PER_HOUR;
+        final double positionDelta = maxPosition - minPosition;
+        final double timeDelta = endTime - startTime;
+        final double averageSpeed = positionDelta / timeDelta * METERS_PER_SEC_TO_MILES_PER_HOUR;
         out.collect(new AverageSpeedReport(startTime, endTime, key.getField(0), key.getField(1), key.getField(2), averageSpeed));
     }
 
