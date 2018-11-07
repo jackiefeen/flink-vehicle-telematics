@@ -15,28 +15,4 @@ public class AverageSpeedReport extends Tuple6<Long, Long, Long, Integer, Intege
         this.f4 = direction;
         this.f5 = averageSpeed;
     }
-
-    public Long getStartTime() {
-        return this.f0;
-    }
-
-    public Long getEndTime() {
-        return this.f1;
-    }
-
-    public Long getVehicleId() {
-        return this.f2;
-    }
-
-    public Integer getHighwayId() {
-        return this.f3;
-    }
-
-    public Integer getDirection() {
-        return this.f4;
-    }
-
-    public Double getAverageSpeed() {
-        return this.f5;
-    }
 }
